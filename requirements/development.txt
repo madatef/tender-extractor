@@ -1,0 +1,6 @@
+-r base.txt
+pytest==8.2.0
+pytest-django==4.8.0
+pytest-celery==1.0.1
+factory-boy==3.3.0
+Faker==25.0.0
