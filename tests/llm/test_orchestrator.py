@@ -42,7 +42,7 @@ def make_failure_result(provider="openai_mini", model="gpt-4o-mini"):
 @pytest.mark.django_db
 class TestLLMOrchestrator:
     @override_settings(**MOCK_SETTINGS)
-    @patch("apps.tenders.llm.orchestrator.build_provider")
+    @patch("app.apps.tenders.llm.orchestrator.build_provider")
     def test_primary_success_no_fallback(self, mock_build):
         mock_provider = MagicMock()
         mock_provider.provider_name = "openai_mini"
@@ -60,7 +60,7 @@ class TestLLMOrchestrator:
         assert mock_provider.extract.call_count == 1
 
     @override_settings(**MOCK_SETTINGS)
-    @patch("apps.tenders.llm.orchestrator.build_provider")
+    @patch("app.apps.tenders.llm.orchestrator.build_provider")
     def test_primary_fails_fallback_succeeds(self, mock_build):
         primary_provider = MagicMock()
         primary_provider.provider_name = "openai_mini"
@@ -84,7 +84,7 @@ class TestLLMOrchestrator:
         assert result.used_model == "gpt-5.2"
 
     @override_settings(**MOCK_SETTINGS)
-    @patch("apps.tenders.llm.orchestrator.build_provider")
+    @patch("app.apps.tenders.llm.orchestrator.build_provider")
     def test_all_providers_fail_returns_none_tender(self, mock_build):
         failing_provider = MagicMock()
         failing_provider.provider_name = "openai_mini"
@@ -100,7 +100,7 @@ class TestLLMOrchestrator:
         assert result.tender is None
 
     @override_settings(**MOCK_SETTINGS)
-    @patch("apps.tenders.llm.orchestrator.build_provider")
+    @patch("app.apps.tenders.llm.orchestrator.build_provider")
     def test_retries_exhaust_before_fallback(self, mock_build):
         primary_provider = MagicMock()
         primary_provider.provider_name = "openai_mini"
@@ -123,7 +123,7 @@ class TestLLMOrchestrator:
         assert primary_provider.extract.call_count == MOCK_SETTINGS["LLM_MAX_RETRIES"]
 
     @override_settings(**MOCK_SETTINGS)
-    @patch("apps.tenders.llm.orchestrator.build_provider")
+    @patch("app.apps.tenders.llm.orchestrator.build_provider")
     def test_cost_accumulated_across_attempts(self, mock_build):
         provider = MagicMock()
         provider.provider_name = "openai_mini"
