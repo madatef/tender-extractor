@@ -101,38 +101,39 @@ tender_extractor/
 
 ### Prerequisites
 
-- Python 3.11+
-- Redis running locally (`redis-server` or `brew services start redis`)
-- Supabase project with PostgreSQL credentials
+- Python 3.12.10+ (*NOTE*: some dependecies in this project don't yet have wheels for Python 3.14+. It's recommended to use Python 3.12.13)
+- Redis running locally (`redis-server` or `brew services start redis`). For Windows machines, make sure you have Redis for windows or run Redis inside WSL.
+- Supabase project with PostgreSQL credentials. (Use session pooler connection if your ISP doesn't support IPv6).
 
 ### 1. Clone and create virtualenv
 
 ```bash
-git clone <repo>
+git clone https://github.com/madatef/tender-extractor.git
 cd tender_extractor
-python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -r requirements/development.txt
+python -m venv .venv --prompt tender-extractor
+source venv/bin/activate          # Windows: venv\Scripts\Activate, Git Bash on Windows: source .venv\Scripts\Activate
+pip install -r requirements/development.txt # Or production.txt if you want to mimic prod env
 ```
 
 ### 2. Configure environment
 
 ```bash
 cp .env.example .env
-# Edit .env and fill in your Supabase credentials, OpenAI key, Slack webhook
+# Edit .env and fill in your Supabase credentials, OpenAI key, Slack webhook, etc.
 ```
 
 ### 3. Run migrations
 
 ```bash
 cd app
+python manage.py createmigrations # You can skip this part and fall back to the latest migration file in this repo
 python manage.py migrate
 ```
 
 ### 4. Create a superuser (for admin + token generation)
 
 ```bash
-python manage.py createsuperuser
+python manage.py createsuperuser # Note that the terminal will hide password characters
 ```
 
 ### 5. Start Django
@@ -142,11 +143,11 @@ python manage.py runserver
 # → http://localhost:8000
 ```
 
-### 6. Start Celery worker (separate terminal)
+### 6. Start Celery worker (separate terminal, SAME virtual env)
 
 ```bash
 cd app
-celery -A config.celery worker --loglevel=info
+celery -A config.celery worker --loglevel=info # Use --pool=solo flag on windows for better performance
 ```
 
 ---
@@ -156,12 +157,12 @@ celery -A config.celery worker --loglevel=info
 ### Prerequisites
 
 - Docker Desktop (or Engine + Compose v2)
-- `.env` file configured (copy from `.env.example`)
+- `.env` file configured (copy from `.env.example` and use nano to edit)
 
 ### Start all services
 
 ```bash
-# From the tender_extractor/ root
+# From the tender_extractor/ (root dir)
 cd docker
 docker compose up --build
 ```
@@ -171,11 +172,12 @@ This starts:
 - `celery` — Celery worker
 - `redis` — Redis broker on port 6379
 
-Supabase remains external — configure credentials in `.env`.
+Supabase remains external — configure credentials in `.env`. If you use a local PostgreSQL DB, make sure to update Dockerized deployment accordingly.
 
 ### Run migrations inside Docker
 
 ```bash
+# From tender_extractor/docker
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser
 ```
