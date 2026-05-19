@@ -294,7 +294,7 @@ In development, Swagger is open. In production, it requires JWT auth.
 ## Running Tests
 
 ```bash
-cd app
+# from project root directory
 pytest
 ```
 
